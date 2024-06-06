@@ -1,0 +1,31 @@
+// Licensed to the Technische Universität Darmstadt under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The Technische Universität Darmstadt 
+// licenses this file to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.
+//  
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+[[sect_projects_annotation]]
+= Annotation 
+
+Here the project manager can configure settings that affect the experience on the annotation page.
+
+== Default sidebar
+
+Certain functionalities such as for example document-level annotations are accessible via a sidebar
+on the annotation page. A project manager may choose a default sidebar here which will be expanded
+by default when a new annotator opens a document for annotation. Note that this does not affect
+any annotators that are already working in the current project. Thus, the manager should set the
+default sidebar before adding annotators to the project. Not all pipelines are available to all
+users. If the selected default sidebar is not available to a user, this setting has no effect. A
+typical use for this setting is to set the document metadata sidebar as the default sidebar such
+that annotators can open a document and immediately edit the document-level annotations without 
+first having to search for the sidebar.

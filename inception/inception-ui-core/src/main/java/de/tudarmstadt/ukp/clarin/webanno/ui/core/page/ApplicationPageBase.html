@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+  Licensed to the Technische Universität Darmstadt under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The Technische Universität Darmstadt 
+  licenses this file to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.
+   
+  http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  
+  <link rel="icon" href="favicon.png" type="image/x-icon"/>  
+  <title><wicket:message key="product.name" /> - <wicket:message key="page.title" /></title>
+  
+  <wicket:header-items/>
+</head>
+<body wicket:id="body" data-bs-no-jquery="data-bs-no-jquery">
+  <div>
+    <img id="spinner" wicket:message="alt:busy" src="images/spinner.gif" />
+  </div>
+  
+  <header class="page-header">
+    <wicket:container wicket:id="menubar"/>
+  </header>
+  
+  <main class="page-content flex-h-container">
+    <wicket:child>
+      [CONTENT]
+    </wicket:child>
+  </main>
+
+  <div wicket:id="feedbackPanel" class="feedback-panel"></div>
+
+  <footer wicket:id="footer" class="page-footer">
+    <wicket:container wicket:id="footerItems">
+      <div wicket:id="item"/>
+    </wicket:container>
+  </footer>
+</body>
+</html>

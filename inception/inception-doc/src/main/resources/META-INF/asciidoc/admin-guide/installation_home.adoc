@@ -1,0 +1,66 @@
+// Copyright 2015
+// Ubiquitous Knowledge Processing (UKP) Lab and FG Language Technology
+// Technische Universität Darmstadt
+// 
+// Licensed to the Technische Universität Darmstadt under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The Technische Universität Darmstadt 
+// licenses this file to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.
+//  
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+[[sect_home_folder]]
+= Application home folder
+
+The {product-name} home folder is the place where {product-name}'s configuration file `settings.properties`
+resides and where {product-name} stores its data. By default, this is a (hidden) folder called `.inception` in
+the home directory of the user running {product-name}. However, you can override the location of the
+home folder using the system property `inception.home`.
+
+.Passing a custom home folder location to INCEpTION when starting from the command line
+[source,bash,subs="+attributes"]
+----
+$ java -Dinception.home="/srv/inception" -jar inception-app-webapp-{revnumber}-standalone.jar
+----
+
+If you want to use a `settings.properties` file, you need to place it into the {product-name} home folder yourself. 
+While the home folder is automatically created if it does not exist, the `settings.properties` is not 
+automatically created by the application.
+Mind that if you are using a dedicated database server
+(recommended), then {product-name} also stores some data in the dedicated database. This is important when
+you plan to perform a backup, as both the home folder and the database content need to be
+included in the backup.
+
+Now, let's go through the steps of setting up a home folder for {product-name} and creating a
+configuration file instructing {product-name} to access a dedicated <<sect_database,database>>.
+
+* Create {product-name} home folder. This is the directory where {product-name} settings files and projects (documents, annotations, etc.) are stored
++
+[source,bash]
+----
+$ mkdir /srv/inception
+----
+* Create and edit `/srv/inception/settings.properties` to define the database connection as well as internal backup properties:
++
+[source,text]
+----
+database.url=jdbc:mariadb://localhost:3306/inception?useSSL=false&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8
+database.username=inception
+database.password=t0t4llYSecreT
+----
++
+* Fix permissions in {product-name} home folder
++
+[source,bash]
+----
+$ chown -R www-data:www-data /srv/inception
+----

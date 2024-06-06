@@ -1,0 +1,97 @@
+// Licensed to the Technische Universität Darmstadt under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The Technische Universität Darmstadt 
+// licenses this file to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.
+//  
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+[[sect_setup]]
+= Setup
+
+This section covers setting up a development environment.
+
+== Source code management
+
+We use git as our source code management system and collaborate via the {product-name}
+repository on https://github.com/inception-project/inception[GitHub].
+
+=== Development workflow
+
+Every feature or bug fix needs to be tracked in an issue on GitHub. Development is done in branches. 
+Based on the milestone (see the issue description on GitHub), the new branch is either created from
+master (if the code should be in the next major release) or from a bugfix release branch
+(if the code should be in the next minor release). In order to get the code in production,
+you need to create a pull request on GitHub of your branch into the target branch (as described before).
+
+In order to contribute to {product-name}, you need to create a pull request. This section briefly
+guides you through the best way of doing this:
+
+- Every feature or bug fix needs to be tracked in an issue on GitHub. If there is no issue for the
+feature yet, create an issue first.
+- Create a branch based on the branch to which you wish to contribute. Normally, you should create
+this branch from the master branch of the respective project. In the case that you want to fix a bug in
+the latest released version, you should consider to branch off the latest maintenance branch (e.g.
+0.10.x). If you are not sure, ask via the issue you have just created. Do *not* make changes directly
+to the master or maintenance branches. The name of the branch should be e.g.
+`feature/[ISSUE-NUMBER]-[SHORT-ISSUE-DESCRIPTION]` or `bugfix/[ISSUE-NUMBER]-[SHORT-ISSUE-DESCRIPTION]`.
+- Now you make changes to your branch. When committing to your branch, use the format shown below
+for your commit messages. Note that **#** normally introduces comments in git. You may have to reconfigure
+git before attempting an interactive rebase and switch it to another comment character.
+
+  #[ISSUE NUMBER] - [ISSUE TITLE]
+  [EMPTY LINE]
+  - [CHANGE 1]
+  - [CHANGE 2]
+  - [...]
+
+You can create the pull request any time after your first commit. I.e. you do not have to wait until
+you are completely finished with your implementation. Creating a pull request early tells other
+developers that you are actively working on an issue and facilitates asking questions about and
+discussing implementation details.
+
+=== Git configuration
+
+Before committing, make sure that you specified your email and name in the git config so
+that commits can be attributed to you. This can e.g. be done as described in the
+https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup[Git Documentation].
+
+All sources files are stored using UNIX line endings. If you develop on Windows, you have to
+set the `core.autocrlf` configuration setting to `input` to avoid accidentally submitting Windows
+line endings to the repository. Using `input` is a good strategy in most cases, thus you should
+consider setting this as a global (add `--global`) or even as a system (`--system`) setting.
+
+.Configure git line ending treatment
+[source,text]
+----
+C:\> git config --global core.autocrlf input
+----
+
+After changing this setting, best do a fresh clone and check-out of the project.
+
+== Code style
+
+We use a style for formatting the source code in {product-name}. Our approach consists of two steps:
+
+* DKPro code formatting profile - the profile configures your IDE to auto-format the code according to
+  our guidelines as you go.
+* Checkstyle - this tool is used to check if the source code is actually formatted according to our
+  guidelines. It is run as part of a Maven build and the build fails if the code is not formatted
+  properly.
+
+Here is a brief summary of the formatting rules:
+
+* no tabs, only spaces
+* indenting using 4 spaces in Java files and 2 spaces in XML files
+* maximum 100 characters per line (with a few exceptions)
+* curly braces on the next line for class/method declarations, same line for logic blocks (if/for/...)
+* parameter names start with `a` (e.g. `void foo(String aValue)`)
+

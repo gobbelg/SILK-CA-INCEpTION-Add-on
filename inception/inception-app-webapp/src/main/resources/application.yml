@@ -1,0 +1,83 @@
+# ===================================================================
+# INCEpTION Properties
+# ===================================================================
+
+# See properties classes for default values
+
+# ===================================================================
+# Spring Boot Properties
+# ===================================================================
+
+# IDENTITY (ContextIdApplicationContextInitializer)
+spring:
+  application:
+    name: INCEpTION
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 31536000
+
+  datasource:
+    url: ${database.url:${INCEPTION_DB_URL:jdbc:hsqldb:file:${inception.home:${user.home}/.inception}/db/inception;hsqldb.default_table_type=cached}}
+    username: ${database.username:${INCEPTION_DB_USERNAME:sa}}
+    password: ${database.password:${INCEPTION_DB_PASSWORD:}}
+    driver-class-name: ${database.driver:${INCEPTION_DB_DRIVER:}}
+
+  jpa:
+    show-sql: false
+    open-in-view: true
+    properties:
+      hibernate:
+        dialect: ${database.dialect:${INCEPTION_DB_DIALECT:}}
+        # Enable SQL statements formatting.
+        # format_sql: true
+        # jmx:
+        #   enabled: true
+    hibernate:
+      ddl-auto: validate
+      naming:
+        # Fix @Column(name="...")
+        # https://github.com/spring-projects/spring-boot/issues/2129
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+server:
+  # Use the forward-header handling of the embedded Tomcat - usually works best
+  forward-headers-strategy: NATIVE
+  error:
+    whitelabel:
+      enabled: false
+    path: /whoops
+
+wicket:
+  core:
+    settings:
+      markup:
+        default-markup-encoding: UTF-8
+  web:
+    servlet:
+      dispatcher-types: request, error, async, forward
+      init-parameters:
+        ignorePaths: /api,/saml2
+  verifier:
+    dependencies:
+      throw-exception-on-dependency-version-mismatch: false
+  stuff:
+    htmlcompressor:
+      enabled: true
+      features:
+        removeComments: true
+        removeIntertagSpaces: true
+        preserveLineBreaks: true
+        compressJavaScript: false
+        compressCss: false
