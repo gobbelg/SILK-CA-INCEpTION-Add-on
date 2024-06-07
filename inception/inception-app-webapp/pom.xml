@@ -662,6 +662,13 @@
       <artifactId>mock-oauth2-server</artifactId>
       <scope>test</scope>
     </dependency>
+
+		<dependency>
+			<groupId>org.vumc.dbmi.ciphi</groupId>
+			<artifactId>silkca-rule-based-annotator</artifactId>
+			<version>31.4-SNAPSHOT</version>
+		</dependency>
+
   </dependencies>
   <build>
     <plugins>
@@ -885,6 +892,7 @@
               <ignoredUsedUndeclaredDependency>org.apache.tomcat.embed:tomcat-embed-core</ignoredUsedUndeclaredDependency>
             </ignoredUsedUndeclaredDependencies>
             <usedDependencies>
+			<usedDependency>org.vumc.dbmi.ciphi:silkca-rule-based-annotator</usedDependency>
               <!-- INCEpTION backend modules - used via Spring -->
               <usedDependency>de.tudarmstadt.ukp.inception.app:inception-guidelines</usedDependency>
               <usedDependency>de.tudarmstadt.ukp.inception.app:inception-documents</usedDependency>

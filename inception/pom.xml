@@ -285,6 +285,7 @@
     <!-- Versioning -->
     <module>inception-versioning</module>
     <module>inception-websocket</module>
+	<module>silkca-rule-based-annotator</module>
   </modules>
 
   <build>

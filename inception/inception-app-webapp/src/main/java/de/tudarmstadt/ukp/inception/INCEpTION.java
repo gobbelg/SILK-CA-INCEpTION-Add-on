@@ -18,6 +18,7 @@
 package de.tudarmstadt.ukp.inception;
 
 import static de.tudarmstadt.ukp.inception.INCEpTION.INCEPTION_BASE_PACKAGE;
+import static de.tudarmstadt.ukp.inception.INCEpTION.SILKCA_INCEPTION_PACKAGE;
 import static de.tudarmstadt.ukp.inception.INCEpTION.WEBANNO_BASE_PACKAGE;
 import static de.tudarmstadt.ukp.inception.support.SettingsUtil.getApplicationHome;
 import static de.tudarmstadt.ukp.inception.support.SettingsUtil.setGlobalLogFolder;
@@ -54,10 +55,10 @@ import de.tudarmstadt.ukp.inception.support.deployment.DeploymentModeService;
  */
 // @formatter:off
 @SpringBootApplication(
-        scanBasePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE },
+        scanBasePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE, SILKCA_INCEPTION_PACKAGE},
         exclude = { SolrAutoConfiguration.class, ElasticsearchRestClientAutoConfiguration.class} )
-@AutoConfigurationPackage(basePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE })
-@EntityScan(basePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE })
+@AutoConfigurationPackage(basePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE, SILKCA_INCEPTION_PACKAGE })
+@EntityScan(basePackages = { INCEPTION_BASE_PACKAGE, WEBANNO_BASE_PACKAGE, SILKCA_INCEPTION_PACKAGE })
 @EnableAsync
 @EnableCaching
 @EnableMethodSecurity(prePostEnabled = true)
@@ -66,6 +67,7 @@ public class INCEpTION
     extends SpringBootServletInitializer
 {
     static final String INCEPTION_BASE_PACKAGE = "de.tudarmstadt.ukp.inception";
+    static final String SILKCA_INCEPTION_PACKAGE = "org.vumc.dbmi.ciphi"; 
     static final String WEBANNO_BASE_PACKAGE = "de.tudarmstadt.ukp.clarin.webanno";
 
     /**
