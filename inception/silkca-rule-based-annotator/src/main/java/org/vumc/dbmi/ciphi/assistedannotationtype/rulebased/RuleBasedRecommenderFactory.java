@@ -33,7 +33,7 @@ import de.tudarmstadt.ukp.inception.recommendation.api.recommender.Recommendatio
 public class RuleBasedRecommenderFactory
     extends RecommendationEngineFactoryImplBase<Void>
 {
-    public static final String ID = "org.vumc.dbmi.ciphi.RuleBasedPiRecommender";
+    public static final String ID = "org.vumc.dbmi.ciphi.RuleBasedRecommender";
 
     @Override
     public String getId()
@@ -50,7 +50,7 @@ public class RuleBasedRecommenderFactory
     @Override
     public String getName()
     {
-        return "RuleBasedPiRecommender";
+        return "RuleBasedRecommender";
     }
 
     /**

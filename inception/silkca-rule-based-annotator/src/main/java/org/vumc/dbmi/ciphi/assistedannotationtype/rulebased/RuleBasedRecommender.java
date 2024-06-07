@@ -123,15 +123,6 @@ public class RuleBasedRecommender
     }
 
     /**
-     * When training should be used. Can be always, optional, or never required
-     */
-    @Override
-    public TrainingCapability getTrainingCapability()
-    {
-        return TrainingCapability.TRAINING_NOT_SUPPORTED;
-    }
-
-    /**
      * Train method called by Inception, which in turn calls internal trainModel method. Also
      * extracts SimpleAnnotatedPhrase annotations from CAS objects.
      */
@@ -142,10 +133,67 @@ public class RuleBasedRecommender
         System.out.println("Training not supported for rule-based system");
     }
 
+    /**
+     * Predict method used by Inception, which gets predictions from internal predict() method. Also
+     * inserts predictions into CAS.
+     */
+    @Override
+    public Range predict(RecommenderContext aContext, CAS aCas, int aBegin, int aEnd)
+        throws RecommendationException
+    {
+        Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
+        Type sentenceType = CasUtil.getAnnotationType(aCas, Sentence.class);
+        List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
+    
+        Type predictedType = getPredictedType(aCas);
+        Feature scoreFeature = getScoreFeature(aCas);
+        Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
+        Feature predictedFeature = getPredictedFeature(aCas);
+        Feature isPredictionFeature = getIsPredictionFeature(aCas);
+    
+        for (SimpleAnnotatedPhrase ann : predictions) {
+            AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
+                    ann.endOffset());
+            annotation.setStringValue(predictedFeature, ann.label());
+            annotation.setDoubleValue(scoreFeature, 1);
+            annotation.setStringValue(scoreExplanationFeature, "");
+            annotation.setBooleanValue(isPredictionFeature, true);
+            aCas.addFsToIndexes(annotation);
+        }
+    
+        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType,
+                aBegin, aEnd);
+        return Range.rangeCoveringAnnotations(candidates);
+    }
+
+    @Override
+    public EvaluationResult evaluate(List<CAS> aCasses, DataSplitter aDataSplitter)
+        throws RecommendationException
+    {
+        EvaluationResult result = new EvaluationResult();
+        result.setEvaluationSkipped(true);
+        return result;
+    }
+
     @Override
     public boolean isReadyForPrediction(RecommenderContext aContext)
     {
         return this.model != null;
+    }
+
+    /**
+     * When training should be used. Can be always, optional, or never required
+     */
+    @Override
+    public TrainingCapability getTrainingCapability()
+    {
+        return TrainingCapability.TRAINING_NOT_SUPPORTED;
+    }
+
+    @Override
+    public int estimateSampleCount(List<CAS> aCasses)
+    {
+        return extractAnnotations(aCasses).size();
     }
 
     private List<SimpleAnnotatedPhrase> extractAnnotations(List<CAS> aCasses)
@@ -167,6 +215,20 @@ public class RuleBasedRecommender
         return annotations;
     }
 
+    private String getDocumentTitleFromCAS(CAS cas)
+    {
+        String documentTitle = null;
+        DocumentMetaData documentMetaData;
+        try {
+            documentMetaData = DocumentMetaData.get(cas.getJCas());
+            documentTitle = documentMetaData.getDocumentTitle();
+        }
+        catch (CASException e) {
+            e.printStackTrace();
+        }
+        return documentTitle;
+    }
+
     /**
      * Gets predictions from Raptat
      * 
@@ -183,67 +245,6 @@ public class RuleBasedRecommender
         List<SimpleAnnotatedPhrase> predictedAnnotations = this.predictor
                 .predict(sentencesAsTokenLists, aModel, tokenType, sentenceType, documentTitle);
         return predictedAnnotations;
-    }
-
-    @Override
-    public EvaluationResult evaluate(List<CAS> aCasses, DataSplitter aDataSplitter)
-        throws RecommendationException
-    {
-        EvaluationResult result = new EvaluationResult();
-        result.setEvaluationSkipped(true);
-        return result;
-    }
-
-    @Override
-    public int estimateSampleCount(List<CAS> aCasses)
-    {
-        return extractAnnotations(aCasses).size();
-    }
-
-    private String getDocumentTitleFromCAS(CAS cas)
-    {
-        String documentTitle = null;
-        DocumentMetaData documentMetaData;
-        try {
-            documentMetaData = DocumentMetaData.get(cas.getJCas());
-            documentTitle = documentMetaData.getDocumentTitle();
-        }
-        catch (CASException e) {
-            e.printStackTrace();
-        }
-        return documentTitle;
-    }
-
-    /**
-     * Predict method used by Inception, which gets predictions from internal predict() method. Also
-     * inserts predictions into CAS.
-     */
-    @Override
-    public Range predict(RecommenderContext aContext, CAS aCas, int aBegin, int aEnd)
-        throws RecommendationException
-    {
-        Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
-        Type sentenceType = CasUtil.getAnnotationType(aCas, Sentence.class);
-        List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
-
-        Type predictedType = getPredictedType(aCas);
-        Feature scoreFeature = getScoreFeature(aCas);
-        Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
-        Feature predictedFeature = getPredictedFeature(aCas);
-        Feature isPredictionFeature = getIsPredictionFeature(aCas);
-
-        for (SimpleAnnotatedPhrase ann : predictions) {
-            AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
-                    ann.endOffset());
-            annotation.setStringValue(predictedFeature, ann.label());
-            annotation.setDoubleValue(scoreFeature, 1);
-            annotation.setStringValue(scoreExplanationFeature, "");
-            annotation.setBooleanValue(isPredictionFeature, true);
-            aCas.addFsToIndexes(annotation);
-        }
-
-        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType, aBegin, aEnd);
-        return Range.rangeCoveringAnnotations(candidates);
     }
 
 }
