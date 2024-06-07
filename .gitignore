@@ -25,3 +25,5 @@ dependency-reduced-pom.xml
 **/src/main/ts/package.json
 **/src/main/ts/package-lock.json
 local/
+.metadata/
+
