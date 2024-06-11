@@ -19,6 +19,7 @@ package de.tudarmstadt.ukp.inception.annotation.events;
 
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.cas.text.AnnotationFS;
+import org.apache.uima.fit.util.FSUtil;
 
 import de.tudarmstadt.ukp.clarin.webanno.model.AnnotationFeature;
 import de.tudarmstadt.ukp.clarin.webanno.model.AnnotationLayer;
@@ -48,6 +49,19 @@ public class FeatureValueUpdatedEvent
         feature = aFeature;
         oldValue = aOldValue;
         newValue = aNewValue;
+
+        /*
+         * Added by Glenn Gobbel on 6/10/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String layerName = aLayer == null ? "Null" : aLayer.getName();
+        String featureName = aFeature == null ? "Null" : aFeature.getName();
+        Integer begin = FSUtil.getFeature(aFS, "begin", Integer.class);
+        Integer end = FSUtil.getFeature(aFS, "end", Integer.class);
+        LOG.info(
+                "SILKCA LOG - Feature added/modified - DOCUMENT:{}\tUSER:{}\tLAYER:{}\tFEATURE:{}\tOLD_VALUE:{}\tNEW_VALUE:{}\tBEGIN:{}\tEND:{}",
+                docName, aUser, layerName, featureName, aOldValue, aNewValue, begin, end);
+        // End of Addition
     }
 
     public FeatureStructure getFS()

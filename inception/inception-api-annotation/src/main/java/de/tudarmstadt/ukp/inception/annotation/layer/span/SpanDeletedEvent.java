@@ -33,5 +33,18 @@ public class SpanDeletedEvent
             AnnotationLayer aLayer, AnnotationFS aAnnotation)
     {
         super(aSource, aDocument, aDocumentOwner, aLayer, aAnnotation);
+        
+        /*
+         * Logging added by Glenn Gobbel on 6/10/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String coveredText = aAnnotation == null ? "Null" : aAnnotation.getCoveredText();
+        String layerName = aLayer == null ? "Null" : aLayer.getName();
+        int begin = aAnnotation == null ? -1 : aAnnotation.getBegin();
+        int end = aAnnotation == null ? -1 : aAnnotation.getEnd();
+
+        LOG.info("SILKCA LOG - Annotation deleted - DOCUMENT:{}\tUSER:{}\tTEXT:{}\tLAYER:{}\tBEGIN:{}\tEND:{}",
+                docName, aDocumentOwner, coveredText, layerName, begin, end);
+        // End addition
     }
 }

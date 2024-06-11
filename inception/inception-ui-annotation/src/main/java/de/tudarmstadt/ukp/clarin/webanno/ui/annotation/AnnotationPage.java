@@ -451,6 +451,18 @@ public class AnnotationPage
 
             // Check if there is an annotation document entry in the database. If there is none,
             // create one.
+            
+            /*
+             * Modified by Glenn Gobbel on 5/16/24 - Added LOG.info
+             */
+            String docName = state == null ? "Null"
+                    : state.getDocument() == null ? "Null" : state.getDocument().getName();
+            String userName = state == null ? "Null"
+                    : state.getUser() == null ? "Null" : state.getUser().getUsername();
+            LOG.info("SILKCA LOG - Opening document - DOCUMENT:{}\tUSER:{}",
+                    docName, userName);
+            // End modification
+            
             LOG.trace("Opening document {}@{} {}", state.getUser(), state.getDocument(), aFocus);
             var annotationDocument = documentService
                     .createOrGetAnnotationDocument(state.getDocument(), state.getUser());

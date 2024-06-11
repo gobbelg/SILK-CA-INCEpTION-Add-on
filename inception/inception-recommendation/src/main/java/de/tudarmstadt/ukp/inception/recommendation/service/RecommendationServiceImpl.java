@@ -1220,6 +1220,18 @@ public class RecommendationServiceImpl
 
         commmitAcceptedLabel(aSessionOwner, aDocument, aDataOwner, aCas, aAdapter, aFeature,
                 aSuggestion, aSuggestion.getLabel(), annotation, aLocation, aAction);
+        
+        /*
+         * Logging added by Glenn Gobbel 6/10/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String featureName = aFeature == null ? "Null" : aFeature.getName();
+        String labelName = aSuggestion == null ? "Null" : aSuggestion.getLabel();
+        String coveredText = annotation.getCoveredText();
+        LOG.info(
+                "SILKCA LOG - Recommendation Accepted - DOCUMENT:{}\tUSER:{}\tFEATURE:{}\tLABEL:{}\tCOVERED_TEXT:{}\tBEGIN:{}\tEND{}",
+                docName, aSessionOwner, featureName, labelName, coveredText, sourceBegin, sourceEnd);
+        // End addition
 
         return annotation;
     }
@@ -2751,6 +2763,19 @@ public class RecommendationServiceImpl
             applicationEventPublisher.publishEvent(new RecommendationRejectedEvent(this, aDocument,
                     aDataOwner, spanSuggestion.getBegin(), spanSuggestion.getEnd(),
                     spanSuggestion.getCoveredText(), feature, spanSuggestion.getLabel()));
+            
+            /*
+             * Logging added by Glenn Gobbel 5/17/24
+             */
+            String docName = aDocument == null ? "Null" : aDocument.getName();
+            String labelName = suggestion.getLabel()
+            String coveredText = spanSuggestion.getCoveredText()
+            int begin = spanSuggestion.getBegin();
+            int end = spanSuggestion.getEnd();
+            LOG.info(
+                    "SILKCA LOG - Recommendation Rejected - DOCUMENT:{}\tUSER:{}\tFEATURE:{}\tLABEL:{}\tCOVERED_TEXT:{}\tBEGIN:{}\tEND{}",
+                    docName, aSessionOwner, feature, labelName, coveredText, begin, end);
+            // End addition
 
         }
         else if (suggestion instanceof RelationSuggestion) {
@@ -2758,6 +2783,8 @@ public class RecommendationServiceImpl
             // TODO: Log rejection
             // TODO: Publish rejection event
         }
+        
+
     }
 
     @Override

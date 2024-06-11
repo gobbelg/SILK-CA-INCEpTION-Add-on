@@ -1130,6 +1130,14 @@ public class DocumentServiceImpl
         setAnnotationDocumentState(adoc, AnnotationDocumentState.NEW, aFlags);
 
         applicationEventPublisher.publishEvent(new AfterDocumentResetEvent(this, adoc, cas));
+        
+        /*
+         * Added logging by Glenn Gobbel on 6/10/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String userName = aUser == null ? "Null" : aUser.getUsername();
+        log.info("SILKCA LOG - Reset all document annotations - DOCUMENT:{}\tUSER:{}", docName, userName);
+        // End addition
     }
 
     @Override
@@ -1437,6 +1445,16 @@ public class DocumentServiceImpl
                     .publishEvent(new AnnotationStateChangeEvent(this, aDocument, oldState));
         }
 
+        /*
+         * Added by Glenn Gobbel on 6/10/24
+         */
+        if (aState == AnnotationDocumentState.FINISHED) {
+            String docName = aDocument == null ? "Null" : aDocument.getName();
+            String user = aDocument == null ? "Null" : aDocument.getUser();
+            log.info("SILKCA LOG - Document state set to finished - DOCUMENT:{}\tUSER:\t{}", docName, user);
+        }
+        // End addition
+        
         return oldState;
     }
 

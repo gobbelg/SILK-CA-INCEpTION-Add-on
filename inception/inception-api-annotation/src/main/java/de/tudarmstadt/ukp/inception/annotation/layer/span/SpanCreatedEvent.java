@@ -33,5 +33,22 @@ public class SpanCreatedEvent
             AnnotationLayer aLayer, AnnotationFS aAnnotation)
     {
         super(aSource, aDocument, aDocumentOwner, aLayer, aAnnotation);
+        
+        /*
+         * Added by Glenn Gobbel on 6/10/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String layerName = aLayer == null ? "Null" : aLayer.getName();
+        String coveredText = "Null";
+        int begin = -1;
+        int end = -1;
+        if (aAnnotation != null) {
+            coveredText = aAnnotation.getCoveredText();
+            begin = aAnnotation.getBegin();
+            end = aAnnotation.getEnd();
+        }
+        LOG.info("SILKCA LOG - New span created - DOCUMENT:{}\tUSER:{}\tLAYER:{}\tTEXT:{}\tBEGIN:{}\tEND:{}",
+                docName, aDocumentOwner, layerName, coveredText, begin, end);
+        // End of addition
     }
 }
