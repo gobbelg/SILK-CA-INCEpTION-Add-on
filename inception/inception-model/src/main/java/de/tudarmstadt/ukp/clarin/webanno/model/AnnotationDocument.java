@@ -37,6 +37,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A persistence object for meta-data of annotation documents. The content of annotation document is
@@ -49,6 +51,12 @@ public class AnnotationDocument
     implements Serializable
 {
     private static final long serialVersionUID = 8496087166198616020L;
+
+    /*
+     * Added by Glenn Gobbel on 6/10/24
+     */
+    protected static final Logger LOG = LoggerFactory.getLogger(AnnotationDocument.class);
+    // End of Addition
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -185,6 +193,18 @@ public class AnnotationDocument
 
     public void setState(AnnotationDocumentState aState)
     {
+        /*
+         * Added by Glenn Gobbel on 6/10/24
+         */
+        String docName = document == null ? "Null" : document.getName();
+        String oldState = state == null ? "Null" : state.getName();
+        String newState = aState == null ? "Null" : aState.getName();
+
+        LOG.info(
+                "SILKCA LOG - Document State Changed - DOCUMENT:{}\tUSER:{}\tOLD_STATE{}\tNEW_STATE{}\t",
+                docName, user, oldState, newState);
+        // End of addition
+
         state = aState;
     }
 

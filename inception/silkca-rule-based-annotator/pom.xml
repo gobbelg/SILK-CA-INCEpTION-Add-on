@@ -53,6 +53,10 @@
 			<artifactId>inception-model</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.inception.app</groupId>
+			<artifactId>inception-security</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>

@@ -77,7 +77,7 @@ public class ProbabilisticRecommender
     // TODO:
     // Change to location of application
     private String stringPathToProperties = "";
-
+    
     public ProbabilisticRecommender(Recommender aRecommender)
     {
         super(aRecommender);
@@ -263,6 +263,8 @@ public class ProbabilisticRecommender
         Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
         Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType,
                 aBegin, aEnd);
+        
+
         List<SimpleAnnotatedPhrase> predictions = predict(aCas, model);
 
         Type predictedType = getPredictedType(aCas);

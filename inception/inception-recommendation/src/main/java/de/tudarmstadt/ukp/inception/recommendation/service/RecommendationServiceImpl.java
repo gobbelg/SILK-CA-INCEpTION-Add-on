@@ -2768,8 +2768,8 @@ public class RecommendationServiceImpl
              * Logging added by Glenn Gobbel 5/17/24
              */
             String docName = aDocument == null ? "Null" : aDocument.getName();
-            String labelName = suggestion.getLabel()
-            String coveredText = spanSuggestion.getCoveredText()
+            String labelName = suggestion.getLabel();
+            String coveredText = spanSuggestion.getCoveredText();
             int begin = spanSuggestion.getBegin();
             int end = spanSuggestion.getEnd();
             LOG.info(

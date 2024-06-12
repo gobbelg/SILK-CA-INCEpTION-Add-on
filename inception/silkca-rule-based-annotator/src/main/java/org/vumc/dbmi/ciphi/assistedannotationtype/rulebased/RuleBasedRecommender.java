@@ -34,9 +34,12 @@ import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.fit.util.CasUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vumc.dbmi.ciphi.SilkCAExperimentalSetup;
+import org.vumc.dbmi.ciphi.SilkCAHelper;
 import org.vumc.dbmi.ciphi.casconverter.CASConverter;
 
 import de.tudarmstadt.ukp.clarin.webanno.api.annotation.util.WebAnnoCasUtil;
+import de.tudarmstadt.ukp.clarin.webanno.security.model.User;
 import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
@@ -63,6 +66,8 @@ public class RuleBasedRecommender
     extends RecommendationEngine
 {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    
+    private static final SilkCAExperimentalSetup EXPERIMENT_SETUP = new SilkCAExperimentalSetup();
 
     public static final Key<RuleBasedPiModel> KEY_MODEL = new Key<>("model");
 
@@ -222,28 +227,59 @@ public class RuleBasedRecommender
     public Range predict(RecommenderContext aContext, CAS aCas, int aBegin, int aEnd)
         throws RecommendationException
     {
+        String userName = aContext.getUser().orElse(new User("otherUser")).getUsername();
+        String documentTitle = SilkCAHelper.getDocumentTitleFromCAS(aCas);
+
         Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
         Type sentenceType = CasUtil.getAnnotationType(aCas, Sentence.class);
-        List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
+        
+        if (predicting(userName, documentTitle)) {
 
-        Type predictedType = getPredictedType(aCas);
-        Feature scoreFeature = getScoreFeature(aCas);
-        Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
-        Feature predictedFeature = getPredictedFeature(aCas);
-        Feature isPredictionFeature = getIsPredictionFeature(aCas);
+            List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
 
-        for (SimpleAnnotatedPhrase ann : predictions) {
-            AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
-                    ann.endOffset());
-            annotation.setStringValue(predictedFeature, ann.label());
-            annotation.setDoubleValue(scoreFeature, 1);
-            annotation.setStringValue(scoreExplanationFeature, "");
-            annotation.setBooleanValue(isPredictionFeature, true);
-            aCas.addFsToIndexes(annotation);
+            Type predictedType = getPredictedType(aCas);
+            Feature scoreFeature = getScoreFeature(aCas);
+            Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
+            Feature predictedFeature = getPredictedFeature(aCas);
+            Feature isPredictionFeature = getIsPredictionFeature(aCas);
+
+            for (SimpleAnnotatedPhrase ann : predictions) {
+                AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
+                        ann.endOffset());
+                annotation.setStringValue(predictedFeature, ann.label());
+                annotation.setDoubleValue(scoreFeature, 1);
+                annotation.setStringValue(scoreExplanationFeature, "");
+                annotation.setBooleanValue(isPredictionFeature, true);
+                aCas.addFsToIndexes(annotation);
+            }
         }
 
-        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType, aBegin, aEnd);
+        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType,
+                aBegin, aEnd);
         return Range.rangeCoveringAnnotations(candidates);
+    }
+
+    private boolean predicting(String userName, String documentTitle)
+    {
+        String nameAssigned = "";
+        for (String name : SilkCAExperimentalSetup.preAnnotationAssignments.keySet()) {
+            if (userName.toLowerCase().contains(name.toLowerCase())) {
+                nameAssigned = name;
+                break;
+            }
+        }
+
+        // Pre-annotation is on by default, so return true if name not assigned
+        if (nameAssigned.isEmpty()) {
+            return true;
+        }
+
+        if (SilkCAExperimentalSetup.preAnnotationAssignments.get(nameAssigned)
+                .contains(documentTitle)) {
+            return true;
+        }
+
+        return false;
     }
 
 }
