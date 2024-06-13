@@ -18,6 +18,8 @@
 package de.tudarmstadt.ukp.inception.recommendation.event;
 
 import org.apache.uima.cas.text.AnnotationFS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 
 import de.tudarmstadt.ukp.clarin.webanno.model.AnnotationFeature;
@@ -28,6 +30,12 @@ public class RecommendationAcceptedEvent
     extends ApplicationEvent
 {
     private static final long serialVersionUID = 4618078923202025558L;
+    
+    /*
+     * Logger added by Glenn Gobbel 6/13/24
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(RecommendationAcceptedEvent.class);
+    // End addition
 
     private final SourceDocument document;
     private final String user;
@@ -45,6 +53,19 @@ public class RecommendationAcceptedEvent
         fs = aFS;
         feature = aFeature;
         recommendedValue = aRecommendedValue;
+        
+        /*
+         * Logging added by Glenn Gobbel 6/13/24
+         */
+        String docName = aDocument == null ? "Null" : aDocument.getName();
+        String featureName = aFeature == null ? "Null" : aFeature.getName();
+        String coveredText = aFS.getCoveredText();
+        int begin = aFS.getBegin();
+        int end = aFS.getEnd();
+        LOG.info(
+                "SILKCA LOG - Recommendation Accepted - DOCUMENT:{}\tUSER:{}\tFEATURE:{}\tLABEL:{}\tCOVERED_TEXT:{}\tBEGIN:{}\tEND{}",
+                docName, aUser, featureName, aRecommendedValue, coveredText, begin,end);
+        // End addition
     }
 
     public SourceDocument getDocument()

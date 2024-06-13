@@ -1220,18 +1220,6 @@ public class RecommendationServiceImpl
 
         commmitAcceptedLabel(aSessionOwner, aDocument, aDataOwner, aCas, aAdapter, aFeature,
                 aSuggestion, aSuggestion.getLabel(), annotation, aLocation, aAction);
-        
-        /*
-         * Logging added by Glenn Gobbel 6/10/24
-         */
-        String docName = aDocument == null ? "Null" : aDocument.getName();
-        String featureName = aFeature == null ? "Null" : aFeature.getName();
-        String labelName = aSuggestion == null ? "Null" : aSuggestion.getLabel();
-        String coveredText = annotation.getCoveredText();
-        LOG.info(
-                "SILKCA LOG - Recommendation Accepted - DOCUMENT:{}\tUSER:{}\tFEATURE:{}\tLABEL:{}\tCOVERED_TEXT:{}\tBEGIN:{}\tEND{}",
-                docName, aSessionOwner, featureName, labelName, coveredText, sourceBegin, sourceEnd);
-        // End addition
 
         return annotation;
     }
