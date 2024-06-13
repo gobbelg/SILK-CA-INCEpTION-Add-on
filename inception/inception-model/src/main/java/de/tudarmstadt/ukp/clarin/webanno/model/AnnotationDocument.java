@@ -201,7 +201,7 @@ public class AnnotationDocument
         String newState = aState == null ? "Null" : aState.getName();
 
         LOG.info(
-                "SILKCA LOG - Document State Changed - DOCUMENT:{}\tUSER:{}\tOLD_STATE{}\tNEW_STATE{}\t",
+                "SILKCA LOG - Document State Changed - DOCUMENT:{}\tUSER:{}\tOLD_STATE:{}\tNEW_STATE:{}\t",
                 docName, user, oldState, newState);
         // End of addition
 
