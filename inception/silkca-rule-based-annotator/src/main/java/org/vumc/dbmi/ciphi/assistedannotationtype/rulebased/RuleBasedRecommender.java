@@ -21,7 +21,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,7 +66,7 @@ import src.main.gov.va.vha09.grecc.raptat.rn.silkca.datastructures.SimpleAnnotat
 public class RuleBasedRecommender
     extends RecommendationEngine
 {
-    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOG = LoggerFactory.getLogger(RuleBasedRecommender.class);
 
     private static final String ANNOTATOR_01 = "Jill";
 
