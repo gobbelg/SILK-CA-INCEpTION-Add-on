@@ -909,6 +909,30 @@ public abstract class AnnotationDetailEditorPanel
 
         // Actually delete annotation
         adapter.delete(state.getDocument(), state.getUser().getUsername(), aCas, aVid);
+        
+        /*
+         * Logging added by Glenn Gobbel on 6/10/24
+         */
+        String docName = "Null";
+        String userName = "Null";
+        if (state != null) {
+            docName = state.getDocument() == null ? "Null" : state.getDocument().getName();
+            userName = state.getUser() == null ? "Null" : state.getUser().getUsername();
+        }
+        String layerName = layer == null ? "Null" : layer.getName();
+        String coveredText = "Null";
+        int begin = -1;
+        int end = -1;
+        if (fs != null) {
+            coveredText = fs.getCoveredText();
+            begin = fs.getBegin();
+            end = fs.getEnd();
+        }
+
+        LOG.info("SILKCA LOG - Annotation deleted - DOCUMENT:{}\tUSER:{}\tTEXT:{}\tLAYER:{}\tBEGIN:{}\tEND:{}",
+                docName, userName, coveredText, layerName, begin, end);
+        // End addition
+        
 
         info(generateMessage(adapter.getLayer(), null, true));
     }

@@ -21,10 +21,12 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.cas.CASException;
@@ -34,9 +36,11 @@ import org.apache.uima.cas.text.AnnotationFS;
 import org.apache.uima.fit.util.CasUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vumc.dbmi.ciphi.SilkCAHelper;
 import org.vumc.dbmi.ciphi.casconverter.CASConverter;
 
 import de.tudarmstadt.ukp.clarin.webanno.api.annotation.util.WebAnnoCasUtil;
+import de.tudarmstadt.ukp.clarin.webanno.security.model.User;
 import de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
@@ -62,7 +66,41 @@ import src.main.gov.va.vha09.grecc.raptat.rn.silkca.datastructures.SimpleAnnotat
 public class RuleBasedRecommender
     extends RecommendationEngine
 {
-    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOG = LoggerFactory.getLogger(RuleBasedRecommender.class);
+
+    private static final String ANNOTATOR_01 = "Jill";
+
+    private static final String ANNOTATOR_02 = "Tina";
+
+    /*
+     * These files will not be pre-annotated based on the names assigned above, ANNOTATOR_01 and
+     * ANNOTATOR_02
+     */
+    private static final Set<String> ANNOTATOR_01_PREANNOTATION = new HashSet<>(
+            List.of("GCS_MIMICIII_240109_002_004_001.txt", "GCS_MIMICIII_240109_002_004_003.txt",
+                    "GCS_MIMICIII_240109_002_004_005.txt", "GCS_MIMICIII_240109_002_004_007.txt",
+                    "GCS_MIMICIII_240109_002_004_009.txt", "GCS_MIMICIII_240109_002_004_011.txt",
+                    "GCS_MIMICIII_240109_002_004_013.txt", "GCS_MIMICIII_240109_002_004_015.txt",
+                    "GCS_MIMICIII_240109_002_004_017.txt", "GCS_MIMICIII_240109_002_004_019.txt",
+                    "GCS_MIMICIII_240109_002_005_001.txt", "GCS_MIMICIII_240109_002_005_003.txt",
+                    "GCS_MIMICIII_240109_002_005_005.txt", "GCS_MIMICIII_240109_002_005_007.txt",
+                    "GCS_MIMICIII_240109_002_005_009.txt", "GCS_MIMICIII_240109_002_005_011.txt",
+                    "GCS_MIMICIII_240109_002_005_013.txt", "GCS_MIMICIII_240109_002_005_015.txt",
+                    "GCS_MIMICIII_240109_002_005_017.txt", "GCS_MIMICIII_240109_002_005_019.txt"));
+
+    private static final Set<String> ANNOTATOR_02_PREANNOTATION = new HashSet<>(
+            List.of("GCS_MIMICIII_240109_002_004_000.txt", "GCS_MIMICIII_240109_002_004_002.txt",
+                    "GCS_MIMICIII_240109_002_004_004.txt", "GCS_MIMICIII_240109_002_004_006.txt",
+                    "GCS_MIMICIII_240109_002_004_008.txt", "GCS_MIMICIII_240109_002_004_010.txt",
+                    "GCS_MIMICIII_240109_002_004_012.txt", "GCS_MIMICIII_240109_002_004_014.txt",
+                    "GCS_MIMICIII_240109_002_004_016.txt", "GCS_MIMICIII_240109_002_004_018.txt",
+                    "GCS_MIMICIII_240109_002_005_000.txt", "GCS_MIMICIII_240109_002_005_002.txt",
+                    "GCS_MIMICIII_240109_002_005_004.txt", "GCS_MIMICIII_240109_002_005_006.txt",
+                    "GCS_MIMICIII_240109_002_005_008.txt", "GCS_MIMICIII_240109_002_005_010.txt",
+                    "GCS_MIMICIII_240109_002_005_012.txt", "GCS_MIMICIII_240109_002_005_014.txt",
+                    "GCS_MIMICIII_240109_002_005_016.txt", "GCS_MIMICIII_240109_002_005_018.txt"));
+
+    private HashMap<String, Set<String>> preannotationAssignments = new HashMap<String, Set<String>>();
 
     public static final Key<RuleBasedPiModel> KEY_MODEL = new Key<>("model");
 
@@ -120,6 +158,18 @@ public class RuleBasedRecommender
         LOG.info("Pi Dictionary for Rule-Based Recommender Loaded");
 
         this.predictor = new RuleBasedPiPredictor();
+
+        preannotationAssignments.put(ANNOTATOR_01, ANNOTATOR_01_PREANNOTATION);
+        preannotationAssignments.put(ANNOTATOR_02, ANNOTATOR_02_PREANNOTATION);
+    }
+
+    /**
+     * When training should be used. Can be always, optional, or never required
+     */
+    @Override
+    public TrainingCapability getTrainingCapability()
+    {
+        return TrainingCapability.TRAINING_NOT_SUPPORTED;
     }
 
     /**
@@ -133,67 +183,10 @@ public class RuleBasedRecommender
         System.out.println("Training not supported for rule-based system");
     }
 
-    /**
-     * Predict method used by Inception, which gets predictions from internal predict() method. Also
-     * inserts predictions into CAS.
-     */
-    @Override
-    public Range predict(RecommenderContext aContext, CAS aCas, int aBegin, int aEnd)
-        throws RecommendationException
-    {
-        Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
-        Type sentenceType = CasUtil.getAnnotationType(aCas, Sentence.class);
-        List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
-    
-        Type predictedType = getPredictedType(aCas);
-        Feature scoreFeature = getScoreFeature(aCas);
-        Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
-        Feature predictedFeature = getPredictedFeature(aCas);
-        Feature isPredictionFeature = getIsPredictionFeature(aCas);
-    
-        for (SimpleAnnotatedPhrase ann : predictions) {
-            AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
-                    ann.endOffset());
-            annotation.setStringValue(predictedFeature, ann.label());
-            annotation.setDoubleValue(scoreFeature, 1);
-            annotation.setStringValue(scoreExplanationFeature, "");
-            annotation.setBooleanValue(isPredictionFeature, true);
-            aCas.addFsToIndexes(annotation);
-        }
-    
-        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType,
-                aBegin, aEnd);
-        return Range.rangeCoveringAnnotations(candidates);
-    }
-
-    @Override
-    public EvaluationResult evaluate(List<CAS> aCasses, DataSplitter aDataSplitter)
-        throws RecommendationException
-    {
-        EvaluationResult result = new EvaluationResult();
-        result.setEvaluationSkipped(true);
-        return result;
-    }
-
     @Override
     public boolean isReadyForPrediction(RecommenderContext aContext)
     {
         return this.model != null;
-    }
-
-    /**
-     * When training should be used. Can be always, optional, or never required
-     */
-    @Override
-    public TrainingCapability getTrainingCapability()
-    {
-        return TrainingCapability.TRAINING_NOT_SUPPORTED;
-    }
-
-    @Override
-    public int estimateSampleCount(List<CAS> aCasses)
-    {
-        return extractAnnotations(aCasses).size();
     }
 
     private List<SimpleAnnotatedPhrase> extractAnnotations(List<CAS> aCasses)
@@ -215,20 +208,6 @@ public class RuleBasedRecommender
         return annotations;
     }
 
-    private String getDocumentTitleFromCAS(CAS cas)
-    {
-        String documentTitle = null;
-        DocumentMetaData documentMetaData;
-        try {
-            documentMetaData = DocumentMetaData.get(cas.getJCas());
-            documentTitle = documentMetaData.getDocumentTitle();
-        }
-        catch (CASException e) {
-            e.printStackTrace();
-        }
-        return documentTitle;
-    }
-
     /**
      * Gets predictions from Raptat
      * 
@@ -245,6 +224,97 @@ public class RuleBasedRecommender
         List<SimpleAnnotatedPhrase> predictedAnnotations = this.predictor
                 .predict(sentencesAsTokenLists, aModel, tokenType, sentenceType, documentTitle);
         return predictedAnnotations;
+    }
+
+    @Override
+    public EvaluationResult evaluate(List<CAS> aCasses, DataSplitter aDataSplitter)
+        throws RecommendationException
+    {
+        EvaluationResult result = new EvaluationResult();
+        result.setEvaluationSkipped(true);
+        return result;
+    }
+
+    @Override
+    public int estimateSampleCount(List<CAS> aCasses)
+    {
+        return extractAnnotations(aCasses).size();
+    }
+
+    private String getDocumentTitleFromCAS(CAS cas)
+    {
+        String documentTitle = null;
+        DocumentMetaData documentMetaData;
+        try {
+            documentMetaData = DocumentMetaData.get(cas.getJCas());
+            documentTitle = documentMetaData.getDocumentTitle();
+        }
+        catch (CASException e) {
+            e.printStackTrace();
+        }
+        return documentTitle;
+    }
+
+    /**
+     * Predict method used by Inception, which gets predictions from internal predict() method. Also
+     * inserts predictions into CAS.
+     */
+    @Override
+    public Range predict(RecommenderContext aContext, CAS aCas, int aBegin, int aEnd)
+        throws RecommendationException
+    {
+        String userName = aContext.getUser().orElse(new User("otherUser")).getUsername();
+        String documentTitle = SilkCAHelper.getDocumentTitleFromCAS(aCas);
+
+        Type tokenType = CasUtil.getAnnotationType(aCas, DATAPOINT_UNIT);
+        Type sentenceType = CasUtil.getAnnotationType(aCas, Sentence.class);
+
+        if (predicting(userName, documentTitle)) {
+
+            List<SimpleAnnotatedPhrase> predictions = predict(aCas, model, tokenType, sentenceType);
+
+            Type predictedType = getPredictedType(aCas);
+            Feature scoreFeature = getScoreFeature(aCas);
+            Feature scoreExplanationFeature = getScoreExplanationFeature(aCas);
+            Feature predictedFeature = getPredictedFeature(aCas);
+            Feature isPredictionFeature = getIsPredictionFeature(aCas);
+
+            for (SimpleAnnotatedPhrase ann : predictions) {
+                AnnotationFS annotation = aCas.createAnnotation(predictedType, ann.beginOffset(),
+                        ann.endOffset());
+                annotation.setStringValue(predictedFeature, ann.label());
+                annotation.setDoubleValue(scoreFeature, 1);
+                annotation.setStringValue(scoreExplanationFeature, "");
+                annotation.setBooleanValue(isPredictionFeature, true);
+                aCas.addFsToIndexes(annotation);
+            }
+        }
+
+        Collection<AnnotationFS> candidates = WebAnnoCasUtil.selectOverlapping(aCas, tokenType,
+                aBegin, aEnd);
+        return Range.rangeCoveringAnnotations(candidates);
+    }
+
+    private boolean predicting(String userName, String documentTitle)
+    {
+        String nameAssigned = "";
+        for (String name : this.preannotationAssignments.keySet()) {
+            if (userName.toLowerCase().contains(name.toLowerCase())) {
+                nameAssigned = name;
+                break;
+            }
+        }
+
+        // Pre-annotation is on by default, so return true if name not assigned
+        if (nameAssigned.isEmpty()) {
+            return true;
+        }
+
+        if (this.preannotationAssignments.get(nameAssigned).contains(documentTitle)) {
+            return false;
+        }
+
+        return true;
     }
 
 }

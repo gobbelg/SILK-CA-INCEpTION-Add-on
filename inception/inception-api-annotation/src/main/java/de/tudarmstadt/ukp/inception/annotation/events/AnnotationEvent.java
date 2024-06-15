@@ -18,6 +18,8 @@
 package de.tudarmstadt.ukp.inception.annotation.events;
 
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 
 import de.tudarmstadt.ukp.clarin.webanno.model.AnnotationLayer;
@@ -31,6 +33,12 @@ public abstract class AnnotationEvent
     implements HybridApplicationUIEvent
 {
     private static final long serialVersionUID = -7460965556870957082L;
+    
+    /*
+     * Added by Glenn Gobbel on 6/10/24
+     */
+    protected static final Logger LOG = LoggerFactory.getLogger(AnnotationEvent.class);
+    // End of Addition
 
     private final Project project;
     private final SourceDocument document;

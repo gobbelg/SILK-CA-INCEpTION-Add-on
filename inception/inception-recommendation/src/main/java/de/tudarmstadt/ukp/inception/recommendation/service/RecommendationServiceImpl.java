@@ -1870,10 +1870,31 @@ public class RecommendationServiceImpl
                 recommender.getName(), recommender.getLayer().getUiName());
         var predictedRange = aEngine.predict(aCtx, aPredictionCas, aPredictionBegin,
                 aPredictionEnd);
+        
+        
 
         // Extract the suggestions from the data which the recommender has written into the CAS
         var generatedSuggestions = extractSuggestions(aIncomingPredictions.getGeneration(),
                 aOriginalCas, aPredictionCas, aDocument, recommender);
+        
+        /*
+         * Added by Glenn Gobbel 6/13/24
+         */
+        String aUser = aCtx.getUser().orElse(new User("OtherUser")).getUsername();
+        String docName = aDocument == null ? "NULL" : aDocument.getName();
+        String layerName = recommender.getLayer() == null ? "NULL" : recommender.getLayer().getName();
+        for (AnnotationSuggestion suggestion : generatedSuggestions) {
+            SpanSuggestion spanSuggestion = (SpanSuggestion) suggestion;
+            String coveredText = spanSuggestion.getCoveredText();
+            String featureName = spanSuggestion.getFeature();
+            String labelName = spanSuggestion.getLabel();
+            int begin = spanSuggestion.getBegin();
+            int end = spanSuggestion.getEnd();
+            LOG.info(
+                    "SILKCA LOG - AnnotationRecommended - DOCUMENT:{}\tUSER:{}\tLAYER:{}\tCOVEREDTEXT:{}\tFEATURE:{}\tLABEL:{}\tBEGIN:{}\tEND:{}",
+                    docName, aUser, layerName, coveredText, featureName, labelName, begin, end);
+        }
+        // End Addition
 
         // Reconcile new suggestions with suggestions from previous run
         var reconciliationResult = reconcile(aActivePredictions, aDocument, recommender,
@@ -2751,6 +2772,19 @@ public class RecommendationServiceImpl
             applicationEventPublisher.publishEvent(new RecommendationRejectedEvent(this, aDocument,
                     aDataOwner, spanSuggestion.getBegin(), spanSuggestion.getEnd(),
                     spanSuggestion.getCoveredText(), feature, spanSuggestion.getLabel()));
+            
+            /*
+             * Logging added by Glenn Gobbel 5/17/24
+             */
+            String docName = aDocument == null ? "Null" : aDocument.getName();
+            String labelName = suggestion.getLabel();
+            String coveredText = spanSuggestion.getCoveredText();
+            int begin = spanSuggestion.getBegin();
+            int end = spanSuggestion.getEnd();
+            LOG.info(
+                    "SILKCA LOG - Recommendation Rejected - DOCUMENT:{}\tUSER:{}\tFEATURE:{}\tLABEL:{}\tCOVERED_TEXT:{}\tBEGIN:{}\tEND{}",
+                    docName, aSessionOwner, feature, labelName, coveredText, begin, end);
+            // End addition
 
         }
         else if (suggestion instanceof RelationSuggestion) {
@@ -2758,6 +2792,8 @@ public class RecommendationServiceImpl
             // TODO: Log rejection
             // TODO: Publish rejection event
         }
+        
+
     }
 
     @Override
